@@ -1,29 +1,20 @@
 ﻿@page "/RazorComponent/DemoProduct"
 <h3 class="text-primary">Demo Product</h3>
+<p>Favorite number : @FavoriteCounter<br /></p>
+<p>Producted Selected : @SelectedProduct</p>
 <div class="row">
     @foreach(var prop in Products)
     {
-        <div class="bg-grey col-6 border">
-            <h4 class="text-secondary">Product - @prop.Id</h4>
-            Name : @prop.Name<br />
-            Price : @prop.Price<br />
-            Show Properties : <input type="checkbox" @bind-value="@prop.IsActive" checked="@(prop.IsActive ? "checked" : null)"/><br />
-            @if (prop.IsActive)
-            {
-                @foreach(var item in prop.ProductProperties)
-                {
-                    <p>@item.Key - @item.Value</p><br/>
-                }
-            }
-            <div class="d-flex flex-row">
-                <button class="btn btn-danger me-2" style="width:100px">Delete</button>
-                <button class="btn btn-success" style="width:100px">Edit</button>
-            </div>
-        </div>
+        <_IndividualComponent Product="@prop" OnFavoriteCountUpdate="FavoriteCountUpdate" OnSelectedProductChanged="SelectedProductChange">
+            <FirstFragment>#1 </FirstFragment>
+            <SecondFragment>#2</SecondFragment>
+        </_IndividualComponent>
     }
 </div>
 @code {
     List<Demo_Product> Products = new();
+    int FavoriteCounter { get; set; }
+    string SelectedProduct { get; set; }
 
     protected override void OnInitialized()
     {
@@ -55,5 +46,21 @@
                 new Demo_ProductProp {Id = 3,Key = "Color",Value = "White"}
             }
             });
+    }
+
+    protected void FavoriteCountUpdate(bool isSelected)
+    {
+        if(isSelected)
+        {
+            FavoriteCounter++;
+        }
+        else
+        {
+            FavoriteCounter--;
+        }
+    }
+    protected void SelectedProductChange(string productName)
+    {
+        SelectedProduct = productName;
     }
 }

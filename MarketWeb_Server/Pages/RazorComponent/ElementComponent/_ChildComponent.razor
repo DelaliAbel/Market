@@ -1,0 +1,40 @@
+﻿@inject IJSRuntime _JsRuntime
+
+<div class="border m-3">
+    <h4>@Title</h4>
+    <div>
+        @if (ChildContent != null)
+        {
+            <span>@ChildContent</span>
+        }
+        <button class="btn btn-danger" @onclick="OnShowMessage"> Clicked me</button>
+        @if (OtherChildContent != null)
+        {
+            <span>@OtherChildContent</span>
+        }
+        <_SubChildComponent></_SubChildComponent>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Child Component";
+
+    [Parameter]  
+    public RenderFragment ChildContent {get;set;}
+
+    [Parameter]  
+    public RenderFragment OtherChildContent {get;set;}
+
+    [Parameter]
+    public EventCallback OnShowMessage { get; set; }
+
+    public async void TestSuccess()
+    {
+        //await _JsRuntime.InvokeVoidAsync("ShowToastr", "success", "Success");
+        //En cas d'extension
+        await _JsRuntime.ToatrSuccess("Operation Successful from child component");
+    }
+
+
+}

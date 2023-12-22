@@ -1,6 +1,8 @@
+using MarketWeb_DataAccess.Data;
 using MarketWeb_Server.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,15 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
+//--------------------Partie de la coonnextion à la BD SqlServer ------------------------------
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer //Appele du type de la BD
+        (   //Recuperation des infos du fichier appSetting.json
+            builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//---------------------AutoMapper-------------------------------------------------------
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

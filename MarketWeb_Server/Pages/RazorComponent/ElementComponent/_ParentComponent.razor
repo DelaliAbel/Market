@@ -1,0 +1,40 @@
+﻿@page "/RazorComponent/ElementComponent/ParentChildRelation"
+<div class="border">
+    <h3>Parent Child Relation</h3>
+    <CascadingValue Value="@CascadeMessage" Name="Message">
+        <CascadingValue Value="@CascadeNumber" Name="Number">
+            <_ChildComponent @ref="_childComp" Title="Child Component Title" OnShowMessage="ShowMessage">
+
+                    <ChildContent>
+                        <div class="alert-info">
+                            Ceci un paragraphe remplit depuis ParentComponent
+                            <span>@Message</span>
+                        </div>
+                        <_DefaultTagComponent placeholder="From parent">
+                        </_DefaultTagComponent>
+                    </ChildContent>
+
+                    @*  - cas de multiple Render Fragment faudra tout changer tout les child en utilisant leur balise
+                    - Cette balise recupère tous les attributs et permet de les redefinir depuis le parent
+                    *@
+                </_ChildComponent>
+        </CascadingValue>
+    </CascadingValue>
+    <div>
+        <button class="btn btn-success" @onclick="()=>_childComp.TestSuccess()">Show Sweet Alert of Child</button>
+    </div>
+</div>
+
+@code {
+    _ChildComponent _childComp { get; set; } = new _ChildComponent();
+
+    public string Message = "";
+    public string CascadeMessage = "Cascade Message from Parent";
+    public string CascadeNumber = "7";
+    int i = 0;
+    public void ShowMessage()
+    {
+        Message = "This is a message " + i;
+        i++;
+    }
+}

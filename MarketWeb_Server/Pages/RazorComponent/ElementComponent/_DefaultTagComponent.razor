@@ -1,0 +1,32 @@
+﻿<div>
+    <h4>Text Input</h4>
+@*    Les proprietes après "attribute" seront priorisé mais avant attribute c'est celui du parent qui sera priorisé*@
+    <input id="nametemp" type="text" @attributes="InputAttributes"/>
+</div>
+
+@code {
+    //DECLARATION DES PROPRIETES UN PAR UN
+    //[Parameter]
+    //public string Placehoder { get; set; } = "Initial Text";
+    //[Parameter]
+    //public string Required { get; set; } = "required";
+    //[Parameter]
+    //public string MaxLength { get; set; } = "10";
+
+
+    // UTILISATION DE LISTE POUR LES PROPRIETES
+    //[Parameter]
+    //public Dictionary<string, object> InputAttributes { get; set; } = new Dictionary<string, object>()
+    //{
+    //    {"required","required"},
+    //    {"placeholder","Initial Text"},
+    //    {"maxlength","13"}
+    //};
+
+
+    //Utilisation dynamic des attribut depuis le parent
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> InputAttributes { get; set; } = new Dictionary<string, object>();
+
+
+}

@@ -1,0 +1,13 @@
+﻿<div class="border m-3">
+    <h4>SubChildComponent</h4>
+    <p>This is form - @MessageFrom</p>
+    <p>This is form - @NumberFrom</p>
+</div>
+
+@code {
+    [CascadingParameter(Name = "Message")]
+    public string MessageFrom { get; set; }
+
+    [CascadingParameter(Name = "Number")]
+    public string NumberFrom { get; set; }
+}
