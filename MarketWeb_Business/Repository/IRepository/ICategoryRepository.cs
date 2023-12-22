@@ -9,10 +9,10 @@ namespace MarketWeb_Business.Repository.IRepository
 {
     public interface ICategoryRepository
     {
-        public CategoryDTO Create(CategoryDTO categoryDTO);
-        public CategoryDTO Update(CategoryDTO categoryDTO);
-        public int Delete(int id);
-        public CategoryDTO Get();
+        public CategoryDTO Create(CategoryDTO i_categoryDTO);
+        public CategoryDTO Update(CategoryDTO i_categoryDTO);
+        public int Delete(int i_id);
+        public CategoryDTO Get(int i_id);
         public IEnumerable<CategoryDTO> GetAll();
     }
 }

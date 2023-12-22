@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MarketWeb_Business\MarketWeb_Business.csproj" />
     <ProjectReference Include="..\MarketWeb_DataAccess\MarketWeb_DataAccess.csproj" />
     <ProjectReference Include="..\MarketWeb_Models\MarketWeb_Models.csproj" />
   </ItemGroup>

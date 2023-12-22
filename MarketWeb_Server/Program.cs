@@ -1,3 +1,5 @@
+using MarketWeb_Business.Repository;
+using MarketWeb_Business.Repository.IRepository;
 using MarketWeb_DataAccess.Data;
 using MarketWeb_Server.Data;
 using Microsoft.AspNetCore.Components;
@@ -21,6 +23,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 //---------------------AutoMapper-------------------------------------------------------
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 var app = builder.Build();
+
+//----------------------Injection des Repository et de leur Interface----------------
+builder.Services.AddScoped<ICategoryRepository,CategoryRepository>();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
