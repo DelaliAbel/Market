@@ -1,0 +1,56 @@
+﻿@page "/Product/Price/{Id:int}"
+@inject IProductPriceRepository _productPriceRepository;
+@inject IProductRepository _productRepository;
+@inject IJSRuntime _JsRuntime;
+
+<h3 class="card-title text-primary mb-3 ml-3">Product Price Product</h3>
+@if (IsLoading)
+{
+    <div class="text-center">
+        <img src="images/loading.gif" />
+    </div>
+}
+else
+{
+    <div class="row border p-2 mb-4">
+        <div class="col-11">
+            <div class="card-body" offset-2>
+                <h4>@Product.Name</h4>
+                <span>Category : @Product.Category.Name</span><br/>
+                <span>Description : @((MarkupString)Product.Description)</span>
+            </div>
+        </div>
+        <div class="col-1">
+            <img src="@Product.ImageUrl" class="w-100"/>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private ProductDTO Product { get; set; } = new();
+    private IEnumerable<ProductPriceDTO> ProductPrices { get; set; } = new List<ProductPriceDTO>();
+    private bool IsLoading { get; set; } = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            try
+            {
+                IsLoading = true;
+                StateHasChanged();
+                Product = await _productRepository.Get(Id);
+                ProductPrices = await _productPriceRepository.GetAll(Id);
+                IsLoading = false;
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                _JsRuntime.ToatrError(ex.Message);
+            }
+        }
+    }
+
+}

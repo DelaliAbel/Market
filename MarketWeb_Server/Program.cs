@@ -2,6 +2,8 @@ using MarketWeb_Business.Repository;
 using MarketWeb_Business.Repository.IRepository;
 using MarketWeb_DataAccess.Data;
 using MarketWeb_Server.Data;
+using MarketWeb_Server.Service;
+using MarketWeb_Server.Service.IService;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
@@ -20,12 +22,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         (   //Recuperation des infos du fichier appSetting.json
             builder.Configuration.GetConnectionString("DefaultConnection")));
 
+//----------------------Injection des Repository et de leur Interface----------------
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IFileUpload, FileUpload>();
+builder.Services.AddScoped<IProductPriceRepository, ProductPriceRepository>();
+
+
 //---------------------AutoMapper-------------------------------------------------------
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 var app = builder.Build();
 
-//----------------------Injection des Repository et de leur Interface----------------
-builder.Services.AddScoped<ICategoryRepository,CategoryRepository>();
 
 
 

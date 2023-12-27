@@ -1,0 +1,180 @@
+﻿@page "/Product/Create"
+@page "/Product/Edit/{Id:int}"
+@inject ICategoryRepository _categoryRepository;
+@inject IProductRepository _productRepository;
+@inject NavigationManager _navigationManager;
+@inject IFileUpload _fileUpload;
+@inject IJSRuntime _JsRuntime;
+
+<div class="row mt-4">
+    <h3 card="card-title text-primary mb-3 ml-3">@Title Product</h3>
+
+    @if(IsLoading)
+    {
+        <div class="text-center">
+            <img src="images/loading.gif" />
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-10">
+                <div class="col-12" offset-2>
+                    <EditForm Model="Product" OnValidSubmit="UpsertProduct">
+                        <DataAnnotationsValidator />
+                        @*<ValidationSummary/>*@
+                        <div class="form-group">
+                            <label>Name</label>
+                            <InputText @bind-Value="Product.Name" class="form-control"></InputText>
+                            <ValidationMessage For="()=>Product.Name" />
+                        </div>
+                        <div class="form-group">
+                            <label>Color</label>
+                            <InputText @bind-Value="Product.Color" class="form-control"></InputText>
+                            <ValidationMessage For="()=>Product.Color" />
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <InputTextArea @bind-Value="Product.Description" class="form-control"></InputTextArea>
+                            <ValidationMessage For="()=>Product.Description" />
+                        </div>
+                        <div class="row pt-4">
+                            <div class="form-group col-6">
+                                <div class="form-group">
+                                    <InputCheckbox @bind-Value="Product.ShopFavorites" class="form-check-input"></InputCheckbox>
+                                    <label class="form-check-label">Is Shop Favorites</label>
+                                </div>
+                            </div>
+                            <div class="form-group col-6">
+                                <div class="form-group">
+                                    <InputCheckbox @bind-Value="Product.CustomerFavorites" class="form-check-input"></InputCheckbox>
+                                    <label class="form-check-label">Is Customer Favorites</label>
+                                </div>
+                            </div>
+                            <div class="form-group col-6">
+                                <label>Category</label>
+                                <InputSelect @bind-Value="Product.CategoryId" class="form-select">
+                                    <option value="0" disabled="disabled" selected>--Select Category--</option>
+                                    @foreach (var item in Categories)
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="()=>Product.CategoryId" />
+                            </div>
+                            <div class="form-group col-6">
+                                <InputFile OnChange="HandleImageUpload">
+                                </InputFile>
+                            </div>
+                        </div>
+
+                        <div class="form-group py-2">
+                            <button class="btn btn-primary">@Title</button>
+                            <NavLink href="product" class="btn btn-secondary">Back to index</NavLink>
+                        </div>
+
+                    </EditForm>
+                </div>
+
+            </div>
+            <div class="col-md-2">
+                <img src="@Product.ImageUrl" class="w-100"/>
+            </div>
+
+        </div>
+
+    }
+
+</div>
+
+@code {
+    public ProductDTO Product { get; set; } = new ProductDTO() { ImageUrl="/images/default.png"};
+    private IEnumerable<CategoryDTO> Categories { get; set; } = new List<CategoryDTO>();
+    [Parameter]
+    public int Id { get; set; }
+    private string OldImage;
+    private string Title { get; set; } = "Create";
+    private bool IsLoading;
+
+
+    //On utilise le OnAfter au lieu de OnInit pour ouvrir et fermer le thread qu'il y'a un rendu,
+    //ainsi eviter de surcharger l'application
+    //Puis nous pouvons mettre à jour la vue à la fin des instruction avec "StateHasChanges"
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await LoadProduct();
+    }
+
+    public async Task LoadProduct()
+    {
+        IsLoading = true;
+        StateHasChanged();
+        Categories = await _categoryRepository.GetAll();
+        if (Id != 0)
+        {
+            Title = "Update";
+            Product = await _productRepository.Get(Id);
+            OldImage = Product.ImageUrl;
+        }
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    public async Task UpsertProduct()
+    {
+        if(Product.Id==0)
+        {
+            //Create
+            await _productRepository.Create(Product);
+            await _JsRuntime.ToatrSuccess("Product created Successfully");
+
+        }
+        else
+        {
+            //Update
+            if(OldImage != Product.ImageUrl)
+            {
+                _fileUpload.DeleteFile(OldImage);
+            }
+            await _productRepository.Update(Product);
+            await _JsRuntime.ToatrSuccess("Product updated Successfully");
+        }
+        _navigationManager.NavigateTo("Product");
+
+    }
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        IsLoading = true;
+        try
+        {
+            if(e.GetMultipleFiles().Count > 0)
+            {
+                foreach(var file in e.GetMultipleFiles())
+                {
+                    System.IO.FileInfo fileInfo = new FileInfo(file.Name);
+                    if(fileInfo.Extension.ToLower() == ".jpg" ||
+                        fileInfo.Extension.ToLower() == ".png" ||
+                        fileInfo.Extension.ToLower() == ".jpeg")
+                    {
+                        Product.ImageUrl = await _fileUpload.UploadFile(file);
+                    }
+                    else
+                    {
+                        _JsRuntime.ToatrError("Please select .jpg/ .jpeg/ .png file only");
+                    }
+                    IsLoading = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+            _JsRuntime.ToatrError(ex.Message);
+
+        }
+    }
+}

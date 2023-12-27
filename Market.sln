@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketWeb_Server", "MarketWeb_Server\MarketWeb_Server.csproj", "{C43C5D5C-9DE2-463C-9974-6E55F16BF867}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketWeb_Server", "MarketWeb_Server\MarketWeb_Server.csproj", "{C43C5D5C-9DE2-463C-9974-6E55F16BF867}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketWeb_Client", "MarketWeb_Client\MarketWeb_Client.csproj", "{404E811F-F419-456B-A0FE-8ECFF9FC462A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketWeb_Client", "MarketWeb_Client\MarketWeb_Client.csproj", "{404E811F-F419-456B-A0FE-8ECFF9FC462A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketWeb_Models", "MarketWeb_Models\MarketWeb_Models.csproj", "{5E35AFC8-B1A6-44EB-B4A7-5C857EF5E106}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketWeb_Models", "MarketWeb_Models\MarketWeb_Models.csproj", "{5E35AFC8-B1A6-44EB-B4A7-5C857EF5E106}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketWeb_Business", "MarketWeb_Business\MarketWeb_Business.csproj", "{CE5A994A-DC76-4F07-83D8-6CA6010BBEC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketWeb_Business", "MarketWeb_Business\MarketWeb_Business.csproj", "{CE5A994A-DC76-4F07-83D8-6CA6010BBEC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketWeb_Common", "MarketWeb_Common\MarketWeb_Common.csproj", "{51E45D49-C803-43A5-AB7F-D3396C66DDB9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketWeb_Common", "MarketWeb_Common\MarketWeb_Common.csproj", "{51E45D49-C803-43A5-AB7F-D3396C66DDB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketWeb_DataAccess", "MarketWeb_DataAccess\MarketWeb_DataAccess.csproj", "{3B35D041-CB4C-4A99-BAC0-6F90567E685C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketWeb_DataAccess", "MarketWeb_DataAccess\MarketWeb_DataAccess.csproj", "{3B35D041-CB4C-4A99-BAC0-6F90567E685C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

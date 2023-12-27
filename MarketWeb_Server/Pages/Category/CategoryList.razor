@@ -1,0 +1,105 @@
+﻿@page "/Category"
+@inject ICategoryRepository _categoryRepository;
+@inject IJSRuntime _JsRuntime;
+<div class="row mt-4">
+    <DeleteConfirmation isParentProcessing="IsLoading" OnDeleteConfirmation_Click="ConfirmDelete_Click"></DeleteConfirmation>
+    <div class="col-6">
+        <h4 card="card-title text-primary">category List</h4>
+    </div>
+    <div class="col-4 offset-2" offset-2>
+        <a href="Category/create" class="btn btn-primary form-control">Add new category</a>
+    </div>
+    <div class="col-12">
+        @if (ListOfCategory.Any())
+        {
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var item in ListOfCategory)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>
+                                <NavLink href="@($"Category/Edit/{item.Id}")" class="btn btn-primary">Edit</NavLink>
+                                <button class="btn btn-danger" @onclick="()=>DeleteCategory(item.Id)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            if(IsLoading)
+            {
+                <div class="text-center">
+                    <img src="images/loading.gif"/>
+                </div>
+            }
+            else
+            {
+                <p>No record found.</p>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private int Id { get; set; }
+
+    private IEnumerable<CategoryDTO> ListOfCategory { get; set; } = new List<CategoryDTO>();
+    private bool IsLoading = true;
+
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    await Task.Run(LoadCotegories);
+    //}
+
+    //On utilise le OnAfter au lieu de OnInit pour ouvrir et fermer le thread qu'il y'a un rendu,
+    //ainsi eviter de surcharger l'application
+    //Puis nous pouvons mettre à jour la vue à la fin des instruction avec "StateHasChanges"
+
+    protected override async Task OnAfterRenderAsync(bool i_firstRender)
+    {
+        if (i_firstRender)
+        {
+            await LoadCotegories();
+        }
+    }
+
+    public async Task LoadCotegories()
+    {
+        IsLoading = true;
+        StateHasChanged();
+        ListOfCategory = await _categoryRepository.GetAll();
+        IsLoading = false;
+        StateHasChanged();
+
+    }
+
+    private void DeleteCategory(int i_Id)
+    {
+        Id = i_Id;
+        _JsRuntime.InvokeVoidAsync("ShowDeleteConfirmationModal");
+
+    }
+
+    public async Task ConfirmDelete_Click(bool _isConfirmed)
+    {
+        IsLoading = true;
+        if (_isConfirmed && Id != 0)
+        {
+            //await Task.Delay(1000);
+            await _categoryRepository.Delete(Id);
+            await LoadCotegories();
+            await _JsRuntime.InvokeVoidAsync("HideDeleteConfirmationModal");
+        }
+        IsLoading = false;
+    }
+}

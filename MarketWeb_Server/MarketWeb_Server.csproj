@@ -21,4 +21,8 @@
     <ProjectReference Include="..\MarketWeb_Models\MarketWeb_Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\Product\" />
+  </ItemGroup>
+
 </Project>

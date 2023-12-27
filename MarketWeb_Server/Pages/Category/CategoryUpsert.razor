@@ -1,0 +1,102 @@
+﻿@page "/Category/Create"
+@page "/Category/Edit/{Id:int}"
+@inject ICategoryRepository _categoryRepository;
+@inject NavigationManager _navigationManager;
+
+<div class="row mt-4">
+    <h3 card="card-title text-primary mb-3 ml-3">@Title Category</h3>
+
+    @if(IsLoading)
+    {
+        <div class="text-center">
+            <img src="images/loading.gif" />
+        </div>
+    }
+    else
+    {
+        <div class="col-12" offset-2>
+            <EditForm Model="Category" OnValidSubmit="UpsertCategory">
+                <DataAnnotationsValidator />
+                @*            <ValidationSummary/>
+            *@            <div class="form-group">
+                    <label>Name</label>
+                    <InputText @bind-Value="Category.Name" class="form-control"></InputText>
+                    <ValidationMessage For="()=>Category.Name" />
+                </div>
+                <div class="form-group py-2">
+                    <button class="btn btn-primary">@Title</button>
+                    <NavLink href="category" class="btn btn-secondary">Back to index</NavLink>
+                </div>
+
+            </EditForm>
+        </div>
+
+    }
+
+</div>
+
+@code {
+    private CategoryDTO Category { get; set; } = new CategoryDTO();
+    [Parameter]
+    public int Id { get; set; }
+    private string Title { get; set; } = "Create";
+    private bool IsLoading;
+
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    if(Id==0)
+    //    {
+    //        Title = "Create";
+    //        IsLoading = false;
+    //    }
+    //    else
+    //    {
+    //        Title = "Edit";
+    //        await Task.Run(LoadCotegory);
+    //    }
+    //}
+
+    //On utilise le OnAfter au lieu de OnInit pour ouvrir et fermer le thread qu'il y'a un rendu,
+    //ainsi eviter de surcharger l'application
+    //Puis nous pouvons mettre à jour la vue à la fin des instruction avec "StateHasChanges"
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+            if(Id==0)
+            {
+                Title = "Create";
+                IsLoading = false;
+            }
+            else
+            {
+                Title = "Edit";
+                await LoadCotegory();
+            }
+    }
+
+    public async Task LoadCotegory()
+    {
+        IsLoading = true;
+        StateHasChanged();
+        Category = await _categoryRepository.Get(Id);
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    public async Task UpsertCategory()
+    {
+        if(Id==0)
+        {
+            await _categoryRepository.Create(Category);
+
+        }
+        else
+        {
+            await _categoryRepository.Update(Category);
+
+        }
+        _navigationManager.NavigateTo("Category");
+
+    }
+}
