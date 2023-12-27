@@ -31,6 +31,9 @@ builder.Services.AddScoped<IProductPriceRepository, ProductPriceRepository>();
 
 //---------------------AutoMapper-------------------------------------------------------
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
+
 var app = builder.Build();
 
 

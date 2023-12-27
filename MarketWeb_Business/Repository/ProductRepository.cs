@@ -66,7 +66,8 @@ namespace MarketWeb_Business.Repository
 
         public async Task<ProductDTO> Get(int i_id)
         {
-            var obj = await _db.Products.Include(item=>item.Category).FirstOrDefaultAsync(item => item.Id == i_id);
+            //Recuperation des données de produit tout en precisant que c'est y compris ses clés étrangère avec leur informations
+            var obj = await _db.Products.Include(item=>item.Category).Include(item => item.ProductPrices).FirstOrDefaultAsync(item => item.Id == i_id);
             if (obj != null)
             {
                 return _mapper.Map<Product, ProductDTO>(obj);
@@ -76,7 +77,7 @@ namespace MarketWeb_Business.Repository
 
         public async Task<IEnumerable<ProductDTO>> GetAll()
         {
-            return _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(_db.Products.Include(item => item.Category));
+            return _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDTO>>(_db.Products.Include(item => item.Category).Include(item => item.ProductPrices));
         }
     }
 }

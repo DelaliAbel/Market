@@ -23,6 +23,64 @@ else
         <div class="col-1">
             <img src="@Product.ImageUrl" class="w-100"/>
         </div>
+        <div class="col-10">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Size</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in ProductPrices)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>
+                                @item.Size
+                            </td>
+                            <td>@item.Price</td>
+
+                            <td>
+                                <button @onclick="UpsertProductPrice" class="btn btn-primary">Edit</button>
+                                <button @onclick="UpsertProductPrice" class="btn btn-success">Price</button>
+@*                                <button class="btn btn-danger" @onclick="()=>DeleteProducts(item.Id)">Delete</button>
+*@                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col-2">
+            <div class="form-group">
+                <EditForm Model="productPrice" OnSubmit="UpsertProductPrice">
+                    <DataAnnotationsValidator />
+                    @*<ValidationSummary/>*@
+                    <div class="form-group">
+                        <InputSelect @bind-Value="productPrice.Size" class="form-select">
+                            <option value="0" disabled="disabled" selected>--Select Size--</option>
+                            @foreach (var item in SizeList)
+                            {
+                                <option value="@item">@item</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input @bind="productPrice.Price" type="number" class="form-control"></input>
+                        <ValidationMessage For="()=>productPrice.Price" />
+                    </div>
+                    <div class="form-group py-2">
+                        <button class="btn btn-primary">@ActionLabel</button>
+                        <NavLink href="product" class="btn btn-secondary">Back to index</NavLink>
+                    </div>
+
+                </EditForm>
+            </div>
+        </div>
+
     </div>
 }
 
@@ -30,8 +88,13 @@ else
     [Parameter]
     public int Id { get; set; }
     private ProductDTO Product { get; set; } = new();
+    private string ActionLabel { get; set; } = "Create";
     private IEnumerable<ProductPriceDTO> ProductPrices { get; set; } = new List<ProductPriceDTO>();
+    private ProductPriceDTO productPrice { get; set; } = new ProductPriceDTO();
     private bool IsLoading { get; set; } = true;
+    public IEnumerable<String> SizeList = new List<String>(){
+        "Small","Medium","Large","8oz","16oz","24oz"
+    };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -51,6 +114,33 @@ else
                 _JsRuntime.ToatrError(ex.Message);
             }
         }
+    }
+
+    public async Task LoadPrice()
+    {
+        Product = await _productRepository.Get(Id);
+        ProductPrices = await _productPriceRepository.GetAll(Id);
+
+    }
+
+    public async Task UpsertProductPrice()
+    {
+        if (productPrice.Id == 0)
+        {
+            //Create
+            productPrice.ProductId = Id;
+            await _productPriceRepository.Create(productPrice);
+            LoadPrice();
+            await _JsRuntime.ToatrSuccess("Product Price created Successfully");
+
+        }
+        else
+        {
+            //Create
+            await _productPriceRepository.Update(productPrice);
+            await _JsRuntime.ToatrSuccess("Product Price updated Successfully");
+        }
+
     }
 
 }
