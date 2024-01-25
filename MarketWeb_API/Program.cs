@@ -24,6 +24,14 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 //---------------------Injection des Repository et de leur Interface-------------------------------------------------------
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
+//-----------------------Autorisation d'accès à l'API depuis MarketWweb-------------------
+builder.Services.AddCors(o=>o.AddPolicy("MarketWeb", builder =>
+{
+    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyMethod();
+}));
+
+
+
 
 var app = builder.Build();
 
@@ -38,6 +46,8 @@ app.UseHttpsRedirection();
 
 //---------------------Routing-------------------------------------------------------
 app.UseRouting();
+//-------------------Use l'autorisation du Cors MarketWeb ----------------
+app.UseCors("MarketWeb");
 
 app.UseAuthorization();
 

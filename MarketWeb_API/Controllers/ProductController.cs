@@ -22,7 +22,7 @@ namespace MarketWeb_API.Controllers
             return Ok(await _productRepository.GetAll());
         }
 
-        [HttpGet("productId")]
+        [HttpGet("{productId}")]
         public async Task<IActionResult> Get(int? productId)
         {
             if(productId == null || productId==null)
@@ -34,7 +34,7 @@ namespace MarketWeb_API.Controllers
                 });
             }
 
-            var product = _productRepository.Get(productId.Value);
+            var product = await _productRepository.Get(productId.Value);
             if (product == null)
             {
                 return BadRequest(new ErrorModelDTO()

@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketWeb_Common", "MarketW
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketWeb_DataAccess", "MarketWeb_DataAccess\MarketWeb_DataAccess.csproj", "{3B35D041-CB4C-4A99-BAC0-6F90567E685C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketWeb_API", "MarketWeb_API\MarketWeb_API.csproj", "{4A8928C5-C76D-44DA-A05B-33A1E1451754}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarketWeb_API", "MarketWeb_API\MarketWeb_API.csproj", "{4A8928C5-C76D-44DA-A05B-33A1E1451754}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
