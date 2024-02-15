@@ -12,18 +12,23 @@ namespace MarketWeb_DataAccess.Data
     {
         //public ApplicationDbContext()
         //{
-                
+
         //}
-        public ApplicationDbContext(DbContextOptions options) : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
             //options.B
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            //base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer(@"Server=localhost\\SQLEXPRESS;Database=MarketWeb;Trusted_Connection=True;TrustServerCertificate=True");
-        }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseSqlServer(@"Server=localhost\\SQLEXPRESS;Database=MarketWeb;Trusted_Connection=True;TrustServerCertificate=True");
+        //}
+
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    base.OnConfiguring(optionsBuilder);
+        //    optionsBuilder.UseSqlServer(@"Server=localhost\\SQLEXPRESS;Database=MarketWeb;Trusted_Connection=True;TrustServerCertificate=True");
+        //}
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }

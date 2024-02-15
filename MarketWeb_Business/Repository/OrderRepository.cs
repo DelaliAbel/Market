@@ -9,152 +9,163 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MarketWeb_Business.Repository
 {
     public class OrderRepository : IOderRepository
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
         private readonly IMapper _mapper;
 
-        public OrderRepository(ApplicationDbContext i_db, IMapper i_mapper)
+        public OrderRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory, IMapper mapper)
         {
-            _db = i_db;
-            _mapper = i_mapper;
+            _dbContextFactory = dbContextFactory;
+            _mapper = mapper;
         }
 
-        public async Task<OrderDTO> Create(OrderDTO i_objDTO)
+        public async Task<OrderDTO> Create(OrderDTO objDTO)
         {
-            try
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                var obj = _mapper.Map<OrderDTO, Order>(i_objDTO);
-                _db.OrderHeaders.Add(obj.OrderHeader);
-                await _db.SaveChangesAsync();
-
-                foreach(var details in obj.OrderDetails)
+                try
                 {
-                    details.OrderHeaderId = obj.OrderHeader.Id;
+                    var obj = _mapper.Map<OrderDTO, Order>(objDTO);
+                    dbContext.OrderHeaders.Add(obj.OrderHeader);
+                    await dbContext.SaveChangesAsync();
+
+                    foreach (var details in obj.OrderDetails)
+                    {
+                        details.OrderHeaderId = obj.OrderHeader.Id;
+                    }
+                    dbContext.OrderDetails.AddRange(obj.OrderDetails);
+                    await dbContext.SaveChangesAsync();
+
+                    return new OrderDTO()
+                    {
+                        OrderHeader = _mapper.Map<OrderHeader, OrderHeaderDTO>(obj.OrderHeader),
+                        OrderDetails = _mapper.Map<IEnumerable<OrderDetail>, IEnumerable<OrderDetailDTO>>(obj.OrderDetails).ToList()
+                    };
+
                 }
-                _db.OrderDetails.AddRange(obj.OrderDetails); // AddRange permet d'ajouter une liste directement
-                await _db.SaveChangesAsync();
-
-                return new OrderDTO()
+                catch (Exception)
                 {
-                    OrderHeader = _mapper.Map<OrderHeader, OrderHeaderDTO>(obj.OrderHeader),
-                    OrderDetails = _mapper.Map<IEnumerable<OrderDetail>, IEnumerable<OrderDetailDTO>>(obj.OrderDetails).ToList()
+                    throw;
+                }
+            }
+        }
+
+        public async Task<int> Delete(int id)
+        {
+            using (var dbContext = _dbContextFactory.CreateDbContext())
+            {
+                var objHeader = await dbContext.OrderHeaders.FirstOrDefaultAsync(u => u.Id == id);
+
+                if (objHeader != null)
+                {
+                    var objDetail = dbContext.OrderDetails.Where(u => u.OrderHeaderId == id);
+                    dbContext.OrderDetails.RemoveRange(objDetail);
+                    dbContext.OrderHeaders.Remove(objHeader);
+                    return await dbContext.SaveChangesAsync();
+                }
+                return 0;
+            }
+        }
+
+        public async Task<OrderDTO> Get(int id)
+        {
+            using (var dbContext = _dbContextFactory.CreateDbContext())
+            {
+                var order = new Order()
+                {
+                    OrderHeader = await dbContext.OrderHeaders.FirstOrDefaultAsync(u => u.Id == id),
+                    OrderDetails = dbContext.OrderDetails.Where(u => u.OrderHeaderId == id).ToList()
                 };
 
+                return order != null ? _mapper.Map<Order, OrderDTO>(order) : new OrderDTO();
             }
-            catch (Exception)
-            {
-
-                throw;
-            }
-
-            return i_objDTO;
         }
 
-        public async Task<int> Delete(int i_id)
+        public async Task<IEnumerable<OrderDTO>> GetAll(string? userId = null, string? status = null)
         {
-            var objHeader = await _db.OrderHeaders.FirstOrDefaultAsync(u=>u.Id == i_id);
-            
-            if(objHeader == null)
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                IEnumerable<OrderDetail> objDetail = _db.OrderDetails.Where(u=>u.OrderHeaderId == i_id);
+                var ordersFromDb = new List<Order>();
 
-                _db.OrderDetails.RemoveRange(objDetail);
-                _db.OrderHeaders.Remove(objHeader);
-                return _db.SaveChanges();
-            }
-            return 0;
-        }
+                var orderHeaders = dbContext.OrderHeaders.ToList();
+                var orderDetails = dbContext.OrderDetails.ToList();
 
-        public async Task<OrderDTO> Get(int i_id)
-        {
-            Order order = new()
-            {
-                OrderHeader = _db.OrderHeaders.FirstOrDefault(u => u.Id == i_id),
-                OrderDetails = _db.OrderDetails.Where(u => u.OrderHeaderId == i_id)
-            };
-
-            if(order == null)
-            {
-                return _mapper.Map<Order,OrderDTO>(order);
-            }
-            return new OrderDTO();
-        }
-
-        public async Task<IEnumerable<OrderDTO>> GetAll(string? i_userId = null, string? i_status = null)
-        {
-            List<Order> OrderFromDb = new List<Order>();
-            IEnumerable<OrderHeader> orderHeaderList = _db.OrderHeaders;
-            IEnumerable<OrderDetail> orderDetailList = _db.OrderDetails;
-
-            foreach(OrderHeader header in orderHeaderList)
-            {
-                Order order = new()
+                foreach (var header in orderHeaders)
                 {
-                    OrderHeader = header,
-                    OrderDetails = orderDetailList.Where(u => u.OrderHeaderId == header.Id)
-                };
-                OrderFromDb.Add(order);
+                    var order = new Order()
+                    {
+                        OrderHeader = header,
+                        OrderDetails = orderDetails.Where(u => u.OrderHeaderId == header.Id).ToList()
+                    };
+                    ordersFromDb.Add(order);
+                }
+                // Faire certains filtres #TODO
+
+                return _mapper.Map<IEnumerable<Order>, IEnumerable<OrderDTO>>(ordersFromDb);
             }
-            //do some filtering #TODO
-
-            return _mapper.Map<IEnumerable<Order>, IEnumerable<OrderDTO>>(OrderFromDb);
-
         }
 
         public async Task<OrderHeaderDTO> MarkPayementSuccessful(int id)
         {
-            var data = await _db.OrderHeaders.FindAsync(id);
-
-            if(data==null)
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
+                var data = await dbContext.OrderHeaders.FindAsync(id);
+
+                if (data == null)
+                {
+                    return new OrderHeaderDTO();
+                }
+                if (data.Status == StaticDetails.Status_Pending)
+                {
+                    data.Status = StaticDetails.Status_Confirmed;
+                    await dbContext.SaveChangesAsync();
+                    return _mapper.Map<OrderHeader, OrderHeaderDTO>(data);
+                }
                 return new OrderHeaderDTO();
             }
-            if (data.Status == StaticDetails.Status_Pending)
-            {
-                data.Status = StaticDetails.Status_Confirmed;
-                await _db.SaveChangesAsync();
-                return _mapper.Map<OrderHeader, OrderHeaderDTO > (data);
-            }
-            return new OrderHeaderDTO();
         }
 
-        public async Task<OrderHeaderDTO> UpdateHeader(OrderHeaderDTO i_objDTO)
+        public async Task<OrderHeaderDTO> UpdateHeader(OrderHeaderDTO objDTO)
         {
-            if(i_objDTO != null)
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                var orderHeader = _mapper.Map<OrderHeaderDTO, OrderHeader>(i_objDTO);
-                _db.OrderHeaders.Update(orderHeader);
-                await _db.SaveChangesAsync();
-                return _mapper.Map<OrderHeader, OrderHeaderDTO>(orderHeader);
+                if (objDTO != null)
+                {
+                    var orderHeader = _mapper.Map<OrderHeaderDTO, OrderHeader>(objDTO);
+                    dbContext.OrderHeaders.Update(orderHeader);
+                    await dbContext.SaveChangesAsync();
+                    return _mapper.Map<OrderHeader, OrderHeaderDTO>(orderHeader);
+                }
+                return new OrderHeaderDTO();
             }
-            return new OrderHeaderDTO();
         }
 
         public async Task<bool> UpdateOrderStatus(int orderId, string status)
         {
-            var data = await _db.OrderHeaders.FindAsync(orderId);
-
-            if (data == null)
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                return false;
+                var data = await dbContext.OrderHeaders.FindAsync(orderId);
+
+                if (data == null)
+                {
+                    return false;
+                }
+
+                data.Status = status;
+
+                if (data.Status == StaticDetails.Status_Shipped)
+                {
+                    data.ShippingDate = DateTime.Now;
+                }
+
+                await dbContext.SaveChangesAsync();
+                return true;
             }
-            
-            data.Status = status;
-
-            if(data.Status == StaticDetails.Status_Shipped)
-            {
-                data.ShippingDate = DateTime.Now;
-            }
-
-            await _db.SaveChangesAsync();
-            return true;
-
         }
     }
 }

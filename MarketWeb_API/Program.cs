@@ -14,7 +14,7 @@ builder.Services.AddSwaggerGen();
 
 //--------------------Partie de la coonnextion à la BD SqlServer ------------------------------
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer //Appele du type de la BD
         (   //Recuperation des infos du fichier appSetting.json
             builder.Configuration.GetConnectionString("DefaultConnection")));

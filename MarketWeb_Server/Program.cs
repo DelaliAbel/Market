@@ -18,13 +18,13 @@ builder.Services.AddSingleton<WeatherForecastService>();
 
 //--------------------Partie de la coonnextion à la BD SqlServer ------------------------------
 
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlServer //Appele du type de la BD
-//        (   //Recuperation des infos du fichier appSetting.json
-//            builder.Configuration.GetConnectionString("DefaultConnection"), x=> x.MigrationsAssembly("MarketWeb_DataAccess")));
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+    options.UseSqlServer //Appele du type de la BD
+        (   //Recuperation des infos du fichier appSetting.json
+            builder.Configuration.GetConnectionString("DefaultConnection")));
 
 //mssqllocaldb
-builder.Services.AddDbContext<ApplicationDbContext>();
+//builder.Services.AddDbContextFactory<ApplicationDbContext>();
 
 //--------------------Partie de la coonnextion à la BD SqlServer ------------------------------
 
@@ -33,7 +33,7 @@ builder.Services.AddDbContext<ApplicationDbContext>();
 
 //----------------------Injection des Repository et de leur Interface----------------
 
-//builder.Services.AddScoped<ApplicationDbContext>();
+builder.Services.AddScoped<ApplicationDbContext>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IFileUpload, FileUpload>();
