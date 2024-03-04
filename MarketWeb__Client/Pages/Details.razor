@@ -120,14 +120,23 @@ else
     {
         //Loacal View Model
         ShoppingCart shoppingCart = new()
-        {
+            {
                 Count = _detailsVM.Count,
                 ProductId = ProductId,
-                ProductPriceId = _detailsVM.SelectedProductPriceId
+                ProductPriceId = _detailsVM.SelectedProductPriceId,
+                ProductPrice = _detailsVM.ProductPrice
         };
 
-        await _cartService.IncrementCart(shoppingCart);
-        _navigationManager.NavigateTo("/");
-        await _JsRuntime.ToatrSuccess("Product added to cart Successfully");
+        if(shoppingCart.ProductPriceId != 0 )
+        {
+            await _cartService.IncrementCart(shoppingCart);
+            _navigationManager.NavigateTo("/");
+            await _JsRuntime.ToatrSuccess("Product added to cart Successfully");
+        }
+        else
+        {
+            await _JsRuntime.ToatrError("Please select a price !");
+        }
+
     }
 }

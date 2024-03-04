@@ -69,7 +69,6 @@ else
 						</div>
 					}
 
-
 					<hr />
 
 					<div class="row">
@@ -94,7 +93,6 @@ else
 				</div>
 			</div>
 		</div>
-
 	}
 }
 
@@ -124,7 +122,7 @@ else
 				cart.Product = Products.FirstOrDefault(u => u.Id == cart.ProductId);
 				cart.ProductPrice = cart.Product.ProductPrices.FirstOrDefault(u => u.Id == cart.ProductPriceId);
 
-				OrderTotal += ((cart.ProductPrice.Price == null) ? 0 : cart.ProductPrice.Price * cart.Count);
+				OrderTotal += cart.ProductPrice.Price * cart.Count;
 			}
 		}
 	}
