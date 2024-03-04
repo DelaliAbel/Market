@@ -16,17 +16,19 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
-//--------------------Partie de la coonnextion à la BD SqlServer ------------------------------
+//--------------------Partie de la coonnextion ï¿½ la BD SqlServer ------------------------------
 
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer //Appele du type de la BD
         (   //Recuperation des infos du fichier appSetting.json
             builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+
 //mssqllocaldb
 //builder.Services.AddDbContextFactory<ApplicationDbContext>();
 
-//--------------------Partie de la coonnextion à la BD SqlServer ------------------------------
+//--------------------Partie de la coonnextion ï¿½ la BD SqlServer ------------------------------
 
 //builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
 
