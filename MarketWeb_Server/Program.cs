@@ -18,12 +18,13 @@ builder.Services.AddSingleton<WeatherForecastService>();
 
 //--------------------Partie de la coonnextion � la BD SqlServer ------------------------------
 
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+builder.Services.AddDbContextFactory<MarketWeb_DataAccess.Data.ApplicationDbContext>(options =>
     options.UseSqlServer //Appele du type de la BD
         (   //Recuperation des infos du fichier appSetting.json
             builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddDefaultIdentity<IdentityUser>()
+    .AddEntityFrameworkStores<MarketWeb_DataAccess.Data.ApplicationDbContext>();
 
 //mssqllocaldb
 //builder.Services.AddDbContextFactory<ApplicationDbContext>();
@@ -35,12 +36,10 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 
 //----------------------Injection des Repository et de leur Interface----------------
 
-builder.Services.AddScoped<ApplicationDbContext>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IFileUpload, FileUpload>();
 builder.Services.AddScoped<IProductPriceRepository, ProductPriceRepository>();
-
 
 //---------------------AutoMapper-------------------------------------------------------
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -66,7 +65,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+//Partie ajoutée
+
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapBlazorHub();
+
+//----------------------
+
 app.MapFallbackToPage("/_Host");
 
 app.Run();
