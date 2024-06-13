@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using MarketWeb_Client;
 using MarketWeb_Client.Service;
 using MarketWeb_Client.Service.IService;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -22,5 +23,8 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 
 //---------------- LacalStorage Injection -------------------------
 builder.Services.AddBlazoredLocalStorage();
+//------------
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 
 await builder.Build().RunAsync();

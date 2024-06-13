@@ -1,7 +1,11 @@
 ﻿<CascadingAuthenticationState> @* Le cascading est ajouter pour la cause de la balise Authorise de la page LoginDisplay *@
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
-            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">@* Simple balise RouteView changer en AuthRouteView pour initialiser les pages en fonction de leur accessibilité selon 'attribute authorize' *@
+                <NotAuthorized>
+                    Oh ! Vous n'êtes pas autorisé à accéder à cette page!
+                </NotAuthorized>
+            </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
         <NotFound>

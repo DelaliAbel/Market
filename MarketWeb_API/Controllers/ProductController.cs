@@ -1,5 +1,7 @@
 ﻿using MarketWeb_Business.Repository.IRepository;
+using MarketWeb_Common;
 using MarketWeb_Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +19,7 @@ namespace MarketWeb_API.Controllers
         }
 
         [HttpGet]
+        //[Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetAll()
         {
             return Ok(await _productRepository.GetAll());

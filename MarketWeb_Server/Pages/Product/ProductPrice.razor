@@ -2,6 +2,8 @@
 @inject IProductPriceRepository _productPriceRepository;
 @inject IProductRepository _productRepository;
 @inject IJSRuntime _JsRuntime;
+@attribute [Authorize]
+
 
 <h3 class="card-title text-primary mb-3 ml-3">Product Price Product</h3>
 @if (IsLoading)

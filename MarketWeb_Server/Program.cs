@@ -23,8 +23,13 @@ builder.Services.AddDbContextFactory<MarketWeb_DataAccess.Data.ApplicationDbCont
         (   //Recuperation des infos du fichier appSetting.json
             builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDefaultIdentity<IdentityUser>()
-    .AddEntityFrameworkStores<MarketWeb_DataAccess.Data.ApplicationDbContext>();
+//LA CONFIGURATION POUR LA SIMPLE UTILISATION D'IDENTITY
+//builder.Services.AddDefaultIdentity<IdentityUser>()
+//    .AddEntityFrameworkStores<MarketWeb_DataAccess.Data.ApplicationDbContext>();
+
+//POUR LA MANIPULATION DES ROLES VOICI LA CONFIGURATION D'IDENTITY
+builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders().AddDefaultUI()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 
 //mssqllocaldb
 //builder.Services.AddDbContextFactory<ApplicationDbContext>();
@@ -40,6 +45,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IFileUpload, FileUpload>();
 builder.Services.AddScoped<IProductPriceRepository, ProductPriceRepository>();
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 //---------------------AutoMapper-------------------------------------------------------
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -70,9 +76,20 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapBlazorHub();
+SeedDatabase();
 
 //----------------------
 
 app.MapFallbackToPage("/_Host");
 
 app.Run();
+
+
+void SeedDatabase()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitializer.Initialize();
+    }
+}

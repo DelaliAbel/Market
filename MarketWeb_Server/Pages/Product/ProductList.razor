@@ -2,6 +2,12 @@
 @inject IProductRepository _productRepository;
 @inject IJSRuntime _JsRuntime;
 @inject IFileUpload _fileUpload;
+@inject NavigationManager _navigationManager;
+
+@* @attribute [Authorize] @* C'est pour le Controle automatique d'accès à la pages sans le faire manuellement
+ *@
+
+
 <div class="row mt-4">
     <DeleteConfirmation isParentProcessing="IsLoading" OnDeleteConfirmation_Click="ConfirmDelete_Click"></DeleteConfirmation>
     <div class="col-6">
@@ -65,7 +71,33 @@
     private int Id { get; set; }
 
     private IEnumerable<ProductDTO> ListOfProducts { get; set; } = new List<ProductDTO>();
-    private bool IsLoading = true;
+    private bool IsLoading { get; set; } = true;
+    private int DeleteProcductId { get; set; } = 0;
+
+    //Cette partie montre comment donner l'accès à l'utilisateur cherchant à accèder à la page
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationState;
+
+        if(!authState.User.Identity.IsAuthenticated)
+        {
+            //Après validation du login redirection vers la page concernée
+            var uri = new Uri(_navigationManager.Uri);
+            _navigationManager.NavigateTo($"/identity/account/login?returnUrl={uri.LocalPath}", forceLoad:true);
+        }
+        else
+        {
+            if (!authState.User.IsInRole(MarketWeb_Common.StaticDetails.Role_Admin))
+        {
+                _navigationManager.NavigateTo("/ErrorPage");
+            }
+
+        }
+    }
+    //---------------------------------------------------------
 
     protected override async Task OnAfterRenderAsync(bool i_firstRender)
     {

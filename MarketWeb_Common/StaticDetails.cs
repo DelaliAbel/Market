@@ -14,6 +14,12 @@ namespace MarketWeb_Common
         public static string Status_Shipped { get; set; } = "Shipped";
         public static string Status_Confirmed { get; set; } = "Confirmed";
         public static string Status_Refunded { get; set; } = "Refunder";
-        public static string Status_Cancelled { get; set; } = "Cancelled";
+
+        public static string Role_Admin { get; set; } = "Admin";
+        public static string Role_Customer { get; set; } = "Customer";
+
+        public static string Local_Token { get; set; } = "Jwt Token";
+
+        public static string Local_UserDtails { get; set; } = "User Details";
     }
 }
