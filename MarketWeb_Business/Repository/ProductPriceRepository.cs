@@ -4,81 +4,88 @@ using MarketWeb_DataAccess;
 using MarketWeb_DataAccess.Data;
 using MarketWeb_Models;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MarketWeb_Business.Repository
 {
     public class ProductPriceRepository : IProductPriceRepository
     {
-        ApplicationDbContext _db;
+        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
         private readonly IMapper _mapper;
 
-        public ProductPriceRepository(ApplicationDbContext i_db, IMapper i_mapper)
+        public ProductPriceRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory, IMapper mapper)
         {
-            _db = i_db;
-            _mapper = i_mapper;
+            _dbContextFactory = dbContextFactory;
+            _mapper = mapper;
         }
 
-        public async Task<ProductPriceDTO> Create(ProductPriceDTO i_productPriceDTO)
+        public async Task<ProductPriceDTO> Create(ProductPriceDTO productPriceDTO)
         {
-            ProductPrice productPriceDB = _mapper.Map<ProductPriceDTO, ProductPrice>(i_productPriceDTO);
-
-            _db.ProductPrices.Add(productPriceDB);
-            await _db.SaveChangesAsync();
-
-            return _mapper.Map<ProductPrice, ProductPriceDTO>(productPriceDB);
-        }
-
-        public async Task<ProductPriceDTO> Update(ProductPriceDTO i_productPriceDTO)
-        {
-            var productPriceDB = await _db.ProductPrices.FirstOrDefaultAsync(item => item.Id == i_productPriceDTO.Id);
-            if (productPriceDB != null)
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                productPriceDB.ProductId = i_productPriceDTO.ProductId;
-                productPriceDB.Size = i_productPriceDTO.Size;
-                productPriceDB.Price = i_productPriceDTO.Price;
-                _db.ProductPrices.Update(productPriceDB);
-                await _db.SaveChangesAsync();
+                var productPriceDB = _mapper.Map<ProductPriceDTO, ProductPrice>(productPriceDTO);
+
+                dbContext.ProductPrices.Add(productPriceDB);
+                await dbContext.SaveChangesAsync();
+
                 return _mapper.Map<ProductPrice, ProductPriceDTO>(productPriceDB);
             }
-            return i_productPriceDTO;
         }
 
-        public async Task<int> Delete(int i_id)
+        public async Task<ProductPriceDTO> Update(ProductPriceDTO productPriceDTO)
         {
-            var productPriceDB = await _db.ProductPrices.FirstOrDefaultAsync(item => item.Id == i_id);
-            if (productPriceDB != null)
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                _db.ProductPrices.Remove(productPriceDB);
-                return await _db.SaveChangesAsync();
+                var productPriceDB = await dbContext.ProductPrices.FirstOrDefaultAsync(item => item.Id == productPriceDTO.Id);
+                if (productPriceDB != null)
+                {
+                    productPriceDB.ProductId = productPriceDTO.ProductId;
+                    productPriceDB.Size = productPriceDTO.Size;
+                    productPriceDB.Price = productPriceDTO.Price;
+                    dbContext.ProductPrices.Update(productPriceDB);
+                    await dbContext.SaveChangesAsync();
+                    return _mapper.Map<ProductPrice, ProductPriceDTO>(productPriceDB);
+                }
+                return productPriceDTO;
             }
-            return 0;
         }
 
-        public async  Task<ProductPriceDTO> Get(int i_id)
+        public async Task<int> Delete(int id)
         {
-            var obj = await _db.ProductPrices.FirstOrDefaultAsync(item => item.Id == i_id);
-            if (obj != null)
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                return _mapper.Map<ProductPrice, ProductPriceDTO>(obj);
+                var productPriceDB = await dbContext.ProductPrices.FirstOrDefaultAsync(item => item.Id == id);
+                if (productPriceDB != null)
+                {
+                    dbContext.ProductPrices.Remove(productPriceDB);
+                    return await dbContext.SaveChangesAsync();
+                }
+                return 0;
             }
-            return new ProductPriceDTO();
         }
 
-        public async Task<IEnumerable<ProductPriceDTO>> GetAll(int? i_id = null)
+        public async Task<ProductPriceDTO> Get(int id)
         {
-            if(i_id!=null & i_id>0)
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                return _mapper.Map<IEnumerable<ProductPrice>, IEnumerable<ProductPriceDTO>>
-                    (_db.ProductPrices.Where(item => item.ProductId==i_id));
+                var productPrice = await dbContext.ProductPrices.FirstOrDefaultAsync(item => item.Id == id);
+                return productPrice != null ? _mapper.Map<ProductPrice, ProductPriceDTO>(productPrice) : new ProductPriceDTO();
             }
-            else
+        }
+
+        public async Task<IEnumerable<ProductPriceDTO>> GetAll(int? id = null)
+        {
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                return _mapper.Map<IEnumerable<ProductPrice>, IEnumerable<ProductPriceDTO>>(_db.ProductPrices);
+                var query = dbContext.ProductPrices.AsQueryable();
+                if (id.HasValue && id > 0)
+                {
+                    query = query.Where(item => item.ProductId == id);
+                }
+                var productPrices = await query.ToListAsync();
+                return _mapper.Map<IEnumerable<ProductPrice>, IEnumerable<ProductPriceDTO>>(productPrices);
             }
         }
     }

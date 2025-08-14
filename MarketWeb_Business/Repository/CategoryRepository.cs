@@ -7,91 +7,80 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MarketWeb_Business.Repository
 {
     public class CategoryRepository : ICategoryRepository
     {
-        ApplicationDbContext _db;
+        private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
         private readonly IMapper _mapper;
 
-        public CategoryRepository(ApplicationDbContext i_db, IMapper i_mapper)
+        public CategoryRepository(IDbContextFactory<ApplicationDbContext> dbContextFactory, IMapper mapper)
         {
-            _db = i_db;
-            _mapper = i_mapper;
+            _dbContextFactory = dbContextFactory;
+            _mapper = mapper;
         }
 
-        public async Task<CategoryDTO> Create(CategoryDTO i_categoryDTO)
+        public async Task<CategoryDTO> Create(CategoryDTO categoryDTO)
         {
-            //Category category = new Category()
-            //{
-            //    Id = categoryDTO.Id,
-            //    Name = categoryDTO.Name,
-            //    CreatedDate = DateTime.Now,
-            //};
-
-            //L'auto mapping permet de faire passer les données persistante DTO de l'appli à la BD,
-            // puis les mise à jour
-            //de la BD sont renvoyer au DTO pour nourir l'appli
-            //Très simple
-
-            //Equivalence
-            Category category = _mapper.Map<CategoryDTO, Category>(i_categoryDTO);
-            category.CreatedDate = DateTime.Now;
-
-            _db.Categories.Add(category);
-            await _db.SaveChangesAsync();
-
-            return _mapper.Map<Category,CategoryDTO>(category);
-
-            //Equivalence
-            //return new CategoryDTO()
-            //{
-            //    Id = category.Id,
-            //    Name = category.Name
-            //};
-
-        }
-
-        public async Task<int> Delete(int i_id)
-        {
-            var objFromDB = await _db.Categories.FirstOrDefaultAsync(item => item.Id==i_id);
-            if(objFromDB != null)
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                _db.Categories.Remove(objFromDB);
-                return await _db.SaveChangesAsync();
+                var category = _mapper.Map<CategoryDTO, Category>(categoryDTO);
+                category.CreatedDate = DateTime.Now;
+
+                dbContext.Categories.Add(category);
+                await dbContext.SaveChangesAsync();
+
+                return _mapper.Map<Category, CategoryDTO>(category);
             }
-            return 0;
         }
 
-        public async Task<CategoryDTO> Get(int i_id)
+        public async Task<int> Delete(int id)
         {
-            var obj = await _db.Categories.FirstOrDefaultAsync(item => item.Id == i_id);
-            if(obj!=null)
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                return _mapper.Map<Category,CategoryDTO>(obj);
+                var objFromDB = await dbContext.Categories.FirstOrDefaultAsync(item => item.Id == id);
+                if (objFromDB != null)
+                {
+                    dbContext.Categories.Remove(objFromDB);
+                    return await dbContext.SaveChangesAsync();
+                }
+                return 0;
             }
-            return new CategoryDTO();
+        }
+
+        public async Task<CategoryDTO> Get(int id)
+        {
+            using (var dbContext = _dbContextFactory.CreateDbContext())
+            {
+                var obj = await dbContext.Categories.FirstOrDefaultAsync(item => item.Id == id);
+                return obj != null ? _mapper.Map<Category, CategoryDTO>(obj) : new CategoryDTO();
+            }
         }
 
         public async Task<IEnumerable<CategoryDTO>> GetAll()
         {
-            return _mapper.Map<IEnumerable<Category>, IEnumerable<CategoryDTO>>(_db.Categories);
+            using (var dbContext = _dbContextFactory.CreateDbContext())
+            {
+                return _mapper.Map<IEnumerable<Category>, IEnumerable<CategoryDTO>>(dbContext.Categories);
+            }
         }
 
         public async Task<CategoryDTO> Update(CategoryDTO objFromDTO)
         {
-            var objFromDB = await _db.Categories.FirstOrDefaultAsync(item => item.Id == objFromDTO.Id);
-            if (objFromDB!= null)
+            using (var dbContext = _dbContextFactory.CreateDbContext())
             {
-                objFromDB.Name = objFromDTO.Name;
-                _db.Categories.Update(objFromDB);
-                await _db.SaveChangesAsync();
-                return _mapper.Map<Category, CategoryDTO>(objFromDB);
+                var objFromDB = await dbContext.Categories.FirstOrDefaultAsync(item => item.Id == objFromDTO.Id);
+                if (objFromDB != null)
+                {
+                    objFromDB.Name = objFromDTO.Name;
+                    dbContext.Categories.Update(objFromDB);
+                    await dbContext.SaveChangesAsync();
+                    return _mapper.Map<Category, CategoryDTO>(objFromDB);
+                }
+                return objFromDTO;
             }
-            return objFromDTO;
         }
     }
 }

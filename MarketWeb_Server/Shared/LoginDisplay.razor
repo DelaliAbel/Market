@@ -1,0 +1,18 @@
+﻿@* Le root d'identity commence sans tenir compte des dossier Areas et Pages*@
+ 
+<AuthorizeView>@*  Quand l'utilisateur se connecte *@
+    
+
+    <Authorized>@* Ce qu'il doit voir *@
+        Hello, @context.User.Identity.Name
+        <a href="Identity/Account/Logout">Logout</a>
+    </Authorized>
+    <NotAuthorized>@* Ce qu'il ne vera pas' *@
+        <a href="Identity/Account/Register">Register</a>
+        <a href="Identity/Account/Login">Login</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+}

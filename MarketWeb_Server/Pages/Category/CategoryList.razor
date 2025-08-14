@@ -1,6 +1,10 @@
 ﻿@page "/Category"
 @inject ICategoryRepository _categoryRepository;
-@inject IJSRuntime _JsRuntime;
+@inject IJSRuntime _JsRuntime
+@using MarketWeb_Common
+@attribute [Authorize(Roles = "Admin")] 
+@*//Cette partie est utilisé pour autoriser ceux qui se connectent à avoir accès à la page.*@
+
 <div class="row mt-4">
     <DeleteConfirmation isParentProcessing="IsLoading" OnDeleteConfirmation_Click="ConfirmDelete_Click"></DeleteConfirmation>
     <div class="col-6">

@@ -6,6 +6,7 @@ using MarketWeb_Server.Service;
 using MarketWeb_Server.Service.IService;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,12 +16,28 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
-//--------------------Partie de la coonnextion à la BD SqlServer ------------------------------
+//--------------------Partie de la coonnextion ï¿½ la BD SqlServer ------------------------------
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContextFactory<MarketWeb_DataAccess.Data.ApplicationDbContext>(options =>
     options.UseSqlServer //Appele du type de la BD
         (   //Recuperation des infos du fichier appSetting.json
             builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//LA CONFIGURATION POUR LA SIMPLE UTILISATION D'IDENTITY
+//builder.Services.AddDefaultIdentity<IdentityUser>()
+//    .AddEntityFrameworkStores<MarketWeb_DataAccess.Data.ApplicationDbContext>();
+
+//POUR LA MANIPULATION DES ROLES VOICI LA CONFIGURATION D'IDENTITY
+builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddDefaultTokenProviders().AddDefaultUI()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+//mssqllocaldb
+//builder.Services.AddDbContextFactory<ApplicationDbContext>();
+
+//--------------------Partie de la coonnextion ï¿½ la BD SqlServer ------------------------------
+
+//builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ApplicationDbContext>();
+
 
 //----------------------Injection des Repository et de leur Interface----------------
 builder.Services.AddScoped<ApplicationDbContext>();
@@ -28,7 +45,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IFileUpload, FileUpload>();
 builder.Services.AddScoped<IProductPriceRepository, ProductPriceRepository>();
-
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 //---------------------AutoMapper-------------------------------------------------------
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -54,7 +71,25 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+//Partie ajoutÃ©e
+
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapBlazorHub();
+SeedDatabase();
+
+//----------------------
+
 app.MapFallbackToPage("/_Host");
 
 app.Run();
+
+
+void SeedDatabase()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitializer.Initialize();
+    }
+}

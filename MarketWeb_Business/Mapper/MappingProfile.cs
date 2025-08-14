@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MarketWeb_DataAccess;
+using MarketWeb_DataAccess.ViewModel;
 using MarketWeb_Models;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,11 @@ namespace MarketWeb_Business.Mapper
             CreateMap<Category, CategoryDTO>().ReverseMap();
             CreateMap<Product, ProductDTO>().ReverseMap();
             CreateMap<ProductPrice, ProductPriceDTO>().ReverseMap();
+            CreateMap<ProductPrice, ProductPriceDTO>().ReverseMap();
+            CreateMap<OrderHeaderDTO, OrderHeader>().ReverseMap();
+            CreateMap<OrderDetail, OrderDetailDTO>().ReverseMap();
+            CreateMap<OrderDTO, Order>().ReverseMap();
+
         }
     }
 }

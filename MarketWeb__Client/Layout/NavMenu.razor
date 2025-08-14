@@ -1,0 +1,95 @@
+﻿@inject ISyncLocalStorageService _localStorage;
+@inject ICartService _cartSerice;
+@implements IDisposable;
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">MarketWeb</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item p-0">
+                    <NavLink class="nav-link" aria-current="page" href="/Cart">
+                        <span>
+                            <i class="bi bi-cart"></i>
+                            (@GetCartCount())
+                        </span>
+                    </NavLink>
+                </li>
+                <li class="nav-item p-0">
+                    <NavLink class="nav-link" href="#">Link</NavLink>
+                </li>
+            </ul>
+            <form class="d-flex">
+                <ul class="navbar-nav">
+                    <AuthorizeView>
+                        <Authorized>
+                            <li class="nav-item p-0">
+                                <NavLink class="nav-link" href="#">
+                                    <span class="p-2">
+                                        Hello, @context.User.Identity.Name
+                                    </span>
+                                </NavLink>
+                            </li>
+                            <li class="nav-item p-0">
+                                <NavLink class="nav-link" href="logout">
+                                    <span class="p-2">
+                                        Logout
+                                    </span>
+                                </NavLink>
+                            </li>
+                        </Authorized>
+                        <NotAuthorized>
+                            <li class="nav-item p-0">
+                                <NavLink class="nav-link" href="register">
+                                    <span class="p-2">
+                                        Register
+                                    </span>
+                                </NavLink>
+                            </li>
+                            <li class="nav-item p-0">
+                                <NavLink class="nav-link" href="login">
+                                    <span class="p-2">
+                                        Login
+                                    </span>
+                                </NavLink>
+                            </li>
+                        </NotAuthorized>
+                    </AuthorizeView>
+
+@*                     <li class="nav-item p-0">
+                        <NavLink class="nav-link p-2" href="register">Register</NavLink>
+                    </li>
+                    <li class="nav-item p-0">
+                        <NavLink class="nav-link p-2" href="login">LogIn</NavLink>
+                    </li>
+ *@                </ul>
+            </form>
+        </div>
+    </div>
+</nav>
+
+@code {
+
+    //Déclenchons le composant du changement de state depuis ICartService
+    // en utilisant le OnInitialized et Dispose
+
+    //on peut aussi utiliser la methode Asyncchrone
+    protected override void OnInitialized()
+    {
+        _cartSerice.Onchange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        _cartSerice.Onchange -= StateHasChanged;
+    }
+
+    private int GetCartCount()
+    {
+        var cart = _localStorage.GetItem<List<ShoppingCart>>(StaticDetails.ShoppingCart);
+        return cart == null ? 0 : cart.Count;
+    }
+}
